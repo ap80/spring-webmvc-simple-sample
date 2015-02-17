@@ -33,7 +33,7 @@ Arahkan browser anda ke alamat [localhost](http://localhost:8080).
 Asumsi yang saya gunakan adalah Anda menggunakan IDE Sprin Tools Suite, jika tidak saya sarankan untuk mengunduhnya sebelum memulai.
 
 ###Buat Proyek Maven
-Sebagai sedikit pengantar jika Anda belum bersahabat dengan [Maven](http://maven.apache.org/). Maven merupakan tools yang berguna untuk dua aspek dalam pengembangan prangkat lunak kususnya menggunakan java, pertama [*dependency management*](http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html) dan kedua [*build process management*](http://maven.apache.org/guides/introduction/introduction-to-plugins.html). Setiap proyek maven menggunakan file konfigurasi [`pom.xml`](http://maven.apache.org/guides/introduction/introduction-to-the-pom.html), disinilah kedua aspek tersebut diatur. Mekanisme *dependency management* diterapkan menggunakan [*repository*](http://maven.apache.org/guides/introduction/introduction-to-repositories.html). Sementara *build process management* dilakukan bertahap dalam [*lifecycle*](http://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html) yang dibagi menjadi *phases*, di dalam masing-masing *phase* inilah developer dapat menggunakan [*plugin*](http://maven.apache.org/guides/introduction/introduction-to-plugins.html) untuk memanipulasi proses build sesuai dengan kebutuhan atau *goal* yang diinginkan. Daftar plugin yang terdaftar dalam situs resmi maven dapat dilihat [di sini](http://maven.apache.org/plugins/index.html) akan tetapi masih banyak plugin lain yang disediakan oleh pihak ketiga, misalnya plugin compiler groovy atau aspectj.
+Sebagai sedikit pengantar jika Anda belum bersahabat dengan [Maven](http://maven.apache.org/). Maven merupakan tools yang dapat digunakan untuk dua aspek dalam pengembangan prangkat lunak kususnya menggunakan java, pertama [*dependency management*](http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html) dan kedua [*build process management*](http://maven.apache.org/guides/introduction/introduction-to-plugins.html). Setiap proyek maven menggunakan file konfigurasi [`pom.xml`](http://maven.apache.org/guides/introduction/introduction-to-the-pom.html), disinilah kedua aspek tersebut diatur. Mekanisme *dependency management* diterapkan menggunakan [*repository*](http://maven.apache.org/guides/introduction/introduction-to-repositories.html). Sementara *build process management* dilakukan bertahap dalam [*lifecycle*](http://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html) yang dibagi menjadi *phases*, di dalam masing-masing *phase* inilah developer dapat menggunakan [*plugin*](http://maven.apache.org/guides/introduction/introduction-to-plugins.html) untuk memanipulasi proses build sesuai dengan kebutuhan atau *goal* yang diinginkan. Daftar plugin yang terdaftar dalam situs resmi maven dapat dilihat [di sini](http://maven.apache.org/plugins/index.html) akan tetapi masih banyak plugin lain yang disediakan oleh pihak ketiga, misalnya plugin compiler groovy atau aspectj.
 
 Langkah pertama adalah create maven web project (jenis *packaging* war), untuk contoh ini saya menggunakan groupId project `com.innovez.samples` dan artifactId `spring-webmvc-sample`, Anda bebas memilih kedua nilai ini sesuai. Lalu edit file `pom.xml` sehingga berisi seperti xml berikut ini.
 
@@ -48,7 +48,39 @@ Langkah pertama adalah create maven web project (jenis *packaging* war), untuk c
 	<name>Spring WebMVC Sample</name>
 	<description>Creating simplest java web application using spring-webmvc</description>
 
+	<dependencyManagement>
+		<dependencies>
+			<!--
+			Bill of Material dari Spring Framework, salah satu gunanya adalah mendefinisikan 
+			versi library spring yang kita perlukan.
+			-->
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-framework-bom</artifactId>
+				<version>4.1.4.RELEASE</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<dependencies>
+		<!--
+		Testing framework.
+		-->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		
+	
 		<!-- 
 		Dependecy untuk logging, facade logging yang akan mendelegasikan tugasnya ke log4j
 		-->
@@ -64,11 +96,11 @@ Langkah pertama adalah create maven web project (jenis *packaging* war), untuk c
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
-			<version>4.1.4.RELEASE</version>
 		</dependency>
 		<!-- 
 		Silahkan ganti versi servlet-api sesuai kontainer yang di gunakan. 
-		Library ini seharusnya disedialan oleh servlet container pada saat runtime.
+		Library ini seharusnya telah disedialan oleh servlet container pada saat runtime
+		sehingga scope:provided (Tidak akan disertakan dalam library dalam war file).
 		-->
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -133,8 +165,13 @@ Selanjutnya kita melakukan konfigurasi untuk aplikasi web kita, cara tradisional
 	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
 	version="3.1">
 	
-	<display-name>spring-security-sample</display-name>
+	<display-name>spring-webmvc-sample</display-name>
 	
+	<!-- 
+	Parameter servlet context yang akan digunakan oleh listener 
+	org.springframework.web.context.ContextLoaderListener 
+	untuk memberikan petunjuk di mana konfigurasi core container spring.
+	-->
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>classpath*:META-INF/spring/core/*-context.xml</param-value>
@@ -146,6 +183,10 @@ Selanjutnya kita melakukan konfigurasi untuk aplikasi web kita, cara tradisional
 	<servlet>
 		<servlet-name>dispatcherServlet</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<!--
+		Parameter isiasi servlet org.springframework.web.servlet.DispatcherServlet
+		untuk memberi petunjuk di mana konfigurasi web container spring diletakan.
+		-->
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
 			<param-value>classpath*:META-INF/spring/web/*-context.xml</param-value>
@@ -154,11 +195,11 @@ Selanjutnya kita melakukan konfigurasi untuk aplikasi web kita, cara tradisional
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>dispatcherServlet</servlet-name>
-		<url-pattern>/*</url-pattern>
+		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 	
 	<!--
-	Kita memaksa servlet container untuk menampilkan custom error page yang kita buat,
+	Kita memaksa sevlet container untuk menampilkan custom error page yang kita buat,
 	bukan default yang disediakan oleh servlet container. 
 	-->
 	<error-page>
@@ -179,6 +220,12 @@ Selanjutnya kita melakukan konfigurasi untuk aplikasi web kita, cara tradisional
 	</error-page>
 </web-app>
 ```
+
+Element pertama yang penting dalam file `web.xml` ini didefinisikan dalam `<listener>...</listener>`. Kelas `org.springframework.web.context.ContextLoaderListener` adalah servlet context listener yang disediakan oleh Spring Web Framework implementasi dari `javax.servlet.ServletContextListener` yang akan menginisiasi *spring core container*. Element yang terkait erat dengan listener ini adalah `<context-param>...</contextParam>` yang mendifinisikan servlet context parameter dengan nama `contextConfigLocation` yaitu lokasi di mana `ContextLoaderListener` akan mencari konfigurasi *spring core container*. Sebagai catatan, inisiasi ini akan dilakukan sebelum komponen `Filter` dan `Servlet` yang didefinisikan diinisiasi oleh servlet container yaitu pertama pada saat servlet container dijalankan. Jika *servlet context parameter* `contextConfigLocation` tidak diberikan maka internal `ContextLoaderListener` akan mencari konfigurasi dengan nama dengan nama coreApplicationContext.xml di ...(?Lupa?)
+
+Element kedua yang penting adalah `<servlet>...</servlet>` serta pasangannya `<servlet-mapping>...</servlet-mapping>`. Element ini mendefinisikan servlet dengan nama `dispatcherServlet` (Namanya terserah developer sebenarnya) dan type `org.springframework.web.servlet.DispatcherServlet` yang disediakan oleh Spring Web Framework. Servlet inilah yang akan **menginisiasi** dan **mengkoordinasi** seluruh komponen web yang diperlukan dalam *spring web container*, misalnya komponen untuk menemukan controller yang akan di-dispatch berdasarkan request dari user, *view resolver*, *theme resolver*, *exception handling*, *validator*, *conversion* dll, silahkan baca dokumentasi resmi spring web. Komponen `DispatcherServlet` bisa dianggap sebagai mekanisme front controller. Dalam `<servlet></servlet>` ini juga didefinisikan sub element `<init-param>...<init-param>` yang parameter inisiasi servlet bersangkutan dengan nama parameter `contextConfigLocation`, parameter inisiasi ini akan meng-override mekaniseme default internal `DispatcherServlet` dalam menemukan konfigurasi kontainer web spring, jadi jika parameter inisiasi ini tidak diberikan maka akan dicari di lokasi deffault (?Lupa?). 
+
+Jika ada pertanyaan kenapa harus ada dua kontainer spring, core dan web? Salah satu jawabannya, struktur konfigurasi ini memungkinkan developer menggunakan web web framework lain lalu tetap menggunakan core container spring untuk *business related component*, misalnya struts, tinggal hapus `<servlet>...</servlet>` yang spesifik ke spring webmvc. Developer boleh saja menggunakan web container untuk mamange seluruh komponen aplikasinya, tidak ada perbedaan yang spesifik saat runtime. Struktur di atas, komponen dalam *web container* bisa mengakses komponen dalam *core container* namun tidak sebaliknya. Untuk yang kedua, karena berada dalam satu container, ya bisa saling ~~berpelukan~~.
 
 ###Konfigurasi Spring Container
 ```xml
@@ -224,4 +271,55 @@ Selanjutnya kita melakukan konfigurasi untuk aplikasi web kita, cara tradisional
 		<mvc:jsp prefix="WEB-INF/views/" suffix=".jsp" />
 	</mvc:view-resolvers>
 </beans>
+```
+
+###Kontroler Sederhana
+Berikut ini adalah contoh controller sederhana.
+
+```java
+package com.innovez.sample.web.controller;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+/**
+ * Contoh greeting controller serderhana.
+ * 
+ * @author zakyalvan
+ */
+@Controller
+public class GreetingController {
+	private static final Logger LOGGER = LoggerFactory.getLogger(GreetingController.class);
+	
+	/**
+	 * Handle request dengan uri "/hello". Jika request parameter "name" tidak
+	 * diberikan maka nilai default untuk parameter "name" akan di berikan
+	 * dengan nilai "Spring User"
+	 * 
+	 * @param name
+	 * @param model
+	 * @return Nama view untuk menampilkan hasil response dari request terhadap
+	 *         controller method ini
+	 */
+	@RequestMapping(value="/hello")
+	public String hello(@RequestParam(value="name", required=false, defaultValue="Spring User") String name, Model model) {
+		LOGGER.debug("Handle greet hello request for name {}", name);
+		model.addAttribute("name", name);
+		return "greet/hello";
+	}
+}
+```
+
+Silahkan baca docblock pada method controller di atas untuk fungsinya. Method `GreetingController.hello` akan mengembalikan (return) nama view untuk menampilkan model hasil. Jenis view tidak terbatas pada HTML namun untuk contoh ini kita gunakan format html. Nama view `greet/hello` berarti akan diresolve ke lokasi `WEB-INF/views/greet/hello.jsp`, silahkan perhatikan konfigurasi sederhana view resolver pada `src/main/resources/META-INF/spring/web/webmvc-context.xml`
+
+```xml
+	...
+	<mvc:view-resolvers>
+		<mvc:jsp prefix="WEB-INF/views/" suffix=".jsp" />
+	</mvc:view-resolvers>
+	...
 ```
