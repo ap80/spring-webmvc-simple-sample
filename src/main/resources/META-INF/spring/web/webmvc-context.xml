@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.1.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd">
+
+	<context:component-scan base-package="com.innovez.sample.web" />
+	
+	<mvc:annotation-driven></mvc:annotation-driven>
+	
+	<mvc:view-controller path="/" view-name="home" status-code="200" />
+	<mvc:view-controller path="/unauthorized" view-name="unauthorized" status-code="401" />
+	<mvc:view-controller path="/access-denied" view-name="access-denied" status-code="403" />
+	<mvc:view-controller path="/not-found" view-name="not-found" status-code="404" />
+	<mvc:view-controller path="/server-error" view-name="server-error" status-code="500" />
+	
+	<mvc:default-servlet-handler />
+	
+	<mvc:view-resolvers>
+		<mvc:jsp prefix="WEB-INF/views/" suffix=".jsp" />
+	</mvc:view-resolvers>
+</beans>
