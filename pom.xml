@@ -8,6 +8,18 @@
 	<name>Spring WebMVC Sample</name>
 	<description>Creating simplest java web application using spring-webmvc</description>
 
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-framework-bom</artifactId>
+				<version>4.1.4.RELEASE</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<dependencies>
 		<!-- 
 		Dependecy untuk logging, facade logging yang akan mendelegasikan tugasnya ke log4j
@@ -24,11 +36,11 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
-			<version>4.1.4.RELEASE</version>
 		</dependency>
 		<!-- 
 		Silahkan ganti versi servlet-api sesuai kontainer yang di gunakan. 
-		Library ini seharusnya disedialan oleh servlet container pada saat runtime.
+		Library ini seharusnya telah disedialan oleh servlet container pada saat runtime
+		sehingga scope:provided (Tidak akan disertakan dalam library dalam war file).
 		-->
 		<dependency>
 			<groupId>javax.servlet</groupId>

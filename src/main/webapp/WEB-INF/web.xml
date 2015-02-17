@@ -27,4 +27,25 @@
 		<servlet-name>dispatcherServlet</servlet-name>
 		<url-pattern>/*</url-pattern>
 	</servlet-mapping>
+	
+	<!--
+	Kita memaksa sevlet container untuk menampilkan custom error page yang kita buat,
+	bukan default yang disediakan oleh servlet container. 
+	-->
+	<error-page>
+		<error-code>401</error-code>
+		<location>/unauthorized</location>
+	</error-page>
+	<error-page>
+		<error-code>403</error-code>
+		<location>/access-denied</location>
+	</error-page>
+	<error-page>
+		<error-code>404</error-code>
+		<location>/not-found</location>
+	</error-page>
+	<error-page>
+		<error-code>500</error-code>
+		<location>/server-error</location>
+	</error-page>
 </web-app>
